@@ -13,5 +13,6 @@ public class ArraySort<T extends Comparable<T>> implements Runnable {
 	@Override
 	public void run() {
 		Arrays.sort(t);
-	}
+	}	
+	
 }
