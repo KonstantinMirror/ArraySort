@@ -38,7 +38,7 @@ public class ParallelSort<T extends Comparable<T>> {
 			manualSort();													//used simpler sorting
 			return array;
 		}
-		if (cores > 1) {
+		if (cores > 1) {													//if processor multicore , sort with multithreading
 			T median = getMedian(0, array.length - 1);						//search average value by 3 point (start, end ,middle)
 			int medianPosition = partition(0, array.length, median); 		//separate by part
 			T[] sortArray_1 = Arrays.copyOf(array, medianPosition + 1);		
@@ -49,9 +49,12 @@ public class ParallelSort<T extends Comparable<T>> {
 			thread_1.start();
 			thread_2.start();
 			thread_1.join();
-			thread_2.join();
+			thread_2.join();												//Concatenate sorted arrays
 			array = concatenate(sortArray_1, sortArray_2);
+		}else{
+			Arrays.sort(array);
 		}
+			
 		return array;
 	}
 

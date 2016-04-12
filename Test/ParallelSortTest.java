@@ -25,8 +25,6 @@ public class ParallelSortTest {
 		assertArrayEquals(compareArray, sortUtil.getArray());
 	}
 	
-	
-	
 	@Test
 	public void testSimple3Elem() {
 		Double[] testArray = new Double[]{80D,9D,1D};
@@ -53,8 +51,6 @@ public class ParallelSortTest {
 		assertArrayEquals(new Double[]{9D,80D}, sortUtil.getArray());
 	}
 	
-	
-	
 	@Test
 	public void testSimple1Elem() {
 		Double[] testArray = new Double[]{80D};
@@ -66,9 +62,5 @@ public class ParallelSortTest {
 			e.printStackTrace();
 		}
 		assertArrayEquals(new Double[]{80D}, sortUtil.getArray());
-
 	}
-	
-	
-
 }
