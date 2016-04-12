@@ -1,5 +1,6 @@
 package epamlab;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class ParallelSort<T extends Comparable<T>> {
@@ -12,7 +13,12 @@ public class ParallelSort<T extends Comparable<T>> {
 		cores = Runtime.getRuntime().availableProcessors();
 	}
 
-	public T getMedian(int left, int right) {
+	public T[] getArray() {
+		return array;
+	}
+
+
+	private T getMedian(int left, int right) {
 		int center = (right - left) / 2;
 		if (compare(left, center)) {
 			swap(left, center);
@@ -27,27 +33,36 @@ public class ParallelSort<T extends Comparable<T>> {
 		return array[right];
 	}
 
-	public T[] quicSort() throws InterruptedException {
-		if (array.length <= 3) {
-			manualSort();
+	public T[] quickSort() throws InterruptedException {
+		if (array.length <= 3) { 											//if small array 
+			manualSort();													//used simpler sorting
 			return array;
 		}
 		if (cores > 1) {
-			T median = getMedian(0, array.length - 1);
-			System.out.println("median is " + median);
-			int medianPosition = partition(0, array.length, median);
-			System.out.println(Arrays.toString(array) + "----out date");
-			T[] sortArray_1 = Arrays.copyOf(array, medianPosition );
-			T[] sortArray_2 = Arrays.copyOfRange(array, medianPosition +1,array.length);
-			System.out.println(Arrays.toString(sortArray_1) + "out1");
-			System.out.println(Arrays.toString(sortArray_2) + "out2");
-			Thread thread_1 = new Thread(new SortArray<T>(sortArray_1));
+			T median = getMedian(0, array.length - 1);						//search average value by 3 point (start, end ,middle)
+			int medianPosition = partition(0, array.length, median); 		//separate by part
+			T[] sortArray_1 = Arrays.copyOf(array, medianPosition + 1);		
+			T[] sortArray_2 = Arrays.copyOfRange(array, 
+					medianPosition + 1, array.length);
+			Thread thread_1 = new Thread(new SortArray<T>(sortArray_1));	// sort by different threads
 			Thread thread_2 = new Thread(new SortArray<T>(sortArray_2));
+			thread_1.start();
+			thread_2.start();
 			thread_1.join();
 			thread_2.join();
-			
+			array = concatenate(sortArray_1, sortArray_2);
 		}
 		return array;
+	}
+
+	private T[] concatenate(T[] A, T[] B) {
+		int aLen = A.length;
+		int bLen = B.length;
+		@SuppressWarnings("unchecked")
+		T[] C = (T[]) Array.newInstance(A.getClass().getComponentType(), aLen + bLen);
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
 	}
 
 	private int partition(int left, int right, T pivot) {
