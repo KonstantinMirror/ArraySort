@@ -14,8 +14,9 @@ public class ParallelSortTest {
 		for (int i = 0; i < testArray.length; i++) {
 			 testArray[i] =(int) (Math.random()*100);
 		}
-		System.err.println(Arrays.toString(testArray));
-		ParallelSort.sort(testArray);
+		ParallelSort<Integer> sortUtil = new ParallelSort<>(testArray);
+		sortUtil.quicSort();
+		
 		
 	}
 
