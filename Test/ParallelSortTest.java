@@ -12,22 +12,30 @@ public class ParallelSortTest {
 	public void test() {
 		Integer[] testArray = new Integer[100000];
 		for (int i = 0; i < testArray.length; i++) {
-			 testArray[i] =(int) (Math.random()*10000);
+			testArray[i] = (int) (Math.random() * 10000);
 		}
 		ParallelSort<Integer> sortUtil = new ParallelSort<>(testArray);
 		Integer[] compareArray = Arrays.copyOf(testArray, testArray.length);
+		long start = System.currentTimeMillis();
 		Arrays.sort(compareArray);
+		long finish = System.currentTimeMillis();
+		double resultDefault = finish - start;
 		try {
+			start = System.currentTimeMillis();
 			sortUtil.quickSort();
+			finish = System.currentTimeMillis();
+			double resultMy = finish - start;
+			double result = resultDefault - resultMy;
+			System.out.println(result );
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		assertArrayEquals(compareArray, sortUtil.getArray());
 	}
-	
+
 	@Test
 	public void testSimple3Elem() {
-		Double[] testArray = new Double[]{80D,9D,1D};
+		Double[] testArray = new Double[] { 80D, 9D, 1D };
 		ParallelSort<Double> sortUtil = new ParallelSort<>(testArray);
 		try {
 			sortUtil.quickSort();
@@ -35,12 +43,12 @@ public class ParallelSortTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertArrayEquals(new Double[]{1D,9D,80D}, sortUtil.getArray());
+		assertArrayEquals(new Double[] { 1D, 9D, 80D }, sortUtil.getArray());
 	}
-	
+
 	@Test
 	public void testSimple2Elem() {
-		Double[] testArray = new Double[]{80D,9D};
+		Double[] testArray = new Double[] { 80D, 9D };
 		ParallelSort<Double> sortUtil = new ParallelSort<>(testArray);
 		try {
 			sortUtil.quickSort();
@@ -48,12 +56,12 @@ public class ParallelSortTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertArrayEquals(new Double[]{9D,80D}, sortUtil.getArray());
+		assertArrayEquals(new Double[] { 9D, 80D }, sortUtil.getArray());
 	}
-	
+
 	@Test
 	public void testSimple1Elem() {
-		Double[] testArray = new Double[]{80D};
+		Double[] testArray = new Double[] { 80D };
 		ParallelSort<Double> sortUtil = new ParallelSort<>(testArray);
 		try {
 			sortUtil.quickSort();
@@ -61,6 +69,6 @@ public class ParallelSortTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertArrayEquals(new Double[]{80D}, sortUtil.getArray());
+		assertArrayEquals(new Double[] { 80D }, sortUtil.getArray());
 	}
 }

@@ -1,7 +1,10 @@
 package epamlab;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class ParallelSort<T extends Comparable<T>> {
 
@@ -17,8 +20,8 @@ public class ParallelSort<T extends Comparable<T>> {
 		return array;
 	}
 
-
 	private T getMedian(int left, int right) {
+		right--;
 		int center = (right - left) / 2;
 		if (compare(left, center)) {
 			swap(left, center);
@@ -34,28 +37,63 @@ public class ParallelSort<T extends Comparable<T>> {
 	}
 
 	public T[] quickSort() throws InterruptedException {
-		if (array.length <= 3) { 											//if small array 
-			manualSort();													//used simpler sorting
+		if (array.length <= 3) { // if small array
+			manualSort(); // used simpler sorting
 			return array;
 		}
-		if (cores > 1) {													//if processor multicore , sort with multithreading
-			T median = getMedian(0, array.length - 1);						//search average value by 3 point (start, end ,middle)
-			int medianPosition = partition(0, array.length, median); 		//separate by part
-			T[] sortArray_1 = Arrays.copyOf(array, medianPosition + 1);		
-			T[] sortArray_2 = Arrays.copyOfRange(array, 
-					medianPosition + 1, array.length);
-			Thread thread_1 = new Thread(new SortArray<T>(sortArray_1));	// sort by different threads
-			Thread thread_2 = new Thread(new SortArray<T>(sortArray_2));
+		if (cores > 1) { // if processor multicore , sort with multithreading
+			List<T[][]> toSort = new ArrayList<>();
+			List<Thread> threads = new ArrayList<>();
+			toSort.add(getPaiArray(array));
+			
+			if ((cores / 2) >= 2) {
+				toSort.add(getPaiArray(toSort.get(0)[0]));
+				toSort.add(getPaiArray(toSort.get(0)[1]));
+			}
+			Iterator<T[][]> iterator = toSort.iterator();
+			while (iterator.hasNext()) {
+				for (T[] currentArrayToSort : iterator.next()) {
+					threads.add(new Thread(new SortArray<T>(currentArrayToSort)));
+				}
+			}
+			Iterator<Thread> threadsIterator  =threads.iterator();
+			while(threadsIterator.hasNext()){
+				threadsIterator.next().start();
+			}
+			threadsIterator = threads.iterator();
+			while(threadsIterator.hasNext()){
+				threadsIterator.next().join();
+			}
+			
+			
+
+			Thread thread_1 = new Thread(new SortArray<T>(partitionArrays[0])); // sort
+																				// by
+																				// different
+																				// threads
+			Thread thread_2 = new Thread(new SortArray<T>(partitionArrays[1]));
 			thread_1.start();
 			thread_2.start();
 			thread_1.join();
-			thread_2.join();												//Concatenate sorted arrays
-			array = concatenate(sortArray_1, sortArray_2);
-		}else{
+			thread_2.join(); // Concatenate sorted arrays
+			array = concatenate(partitionArrays[0], partitionArrays[1]);
+		} else {
 			Arrays.sort(array);
 		}
-			
+
 		return array;
+	}
+
+	private T[][] getPaiArray(T[] divArray) {
+		T median = getMedian(0, array.length);
+		int medianPosition = partition(0, array.length, median);
+		T[] sortArray_1 = Arrays.copyOf(array, medianPosition + 1);
+		T[] sortArray_2 = Arrays.copyOfRange(array, medianPosition + 1, array.length);
+		@SuppressWarnings("unchecked")
+		T[][] partitionArrays = (T[][]) Array.newInstance(divArray.getClass().getComponentType(), 2, 0);
+		partitionArrays[0] = sortArray_1;
+		partitionArrays[1] = sortArray_2;
+		return partitionArrays;
 	}
 
 	private T[] concatenate(T[] A, T[] B) {
